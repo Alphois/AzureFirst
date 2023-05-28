@@ -29,8 +29,47 @@
   <h2>CSV file Parsing (test) </h2>
   <table id="csv-table"></table>
   <script>
-    //searching github repo
-    var jsonOutput;
+  // Function to compare counts and calculate total repositories
+  function compareCounts(repoData, csvData) {
+      const watchersCount = repoData.watchers_count;
+      const forksCount = repoData.forks_count;
+      const starsCount = repoData.stargazers_count;
+
+      const csvLines = csvData.split('\n');
+      let totalRepositoriesS = 0;
+      let totalRepositoriesF = 0;
+      let totalRepositoriesW = 0;
+      for (let i = 1; i < 20; i++) {
+        const csvFields = csvLines[i].split(',');
+
+        const csvStargazersCount = parseInt(csvFields[5]);
+        console.log(csvFields[2]);
+        const csvForksCount = parseInt(csvFields[6]);
+        const csvWatchersCount = parseInt(csvFields[7]);
+
+        if (!isNaN(csvStargazersCount) && !isNaN(csvForksCount) && !isNaN(csvWatchersCount)) {
+          console.log("if it is a #: " +starsCount);
+          if (csvStargazersCount > starsCount){
+            totalRepositoriesS++;
+          }
+          if (  csvForksCount > forksCount){
+            totalRepositoriesF++;
+          }
+          if(csvWatchersCount > watchersCount) {
+            totalRepositoriesW++;
+          }
+        }else{
+          console.log("if it is not a number: " + starsCount + "this is the csv #: " + csvStargazersCount);
+
+        }
+      }
+
+      document.getElementById('stars-count').textContent = totalRepositoriesS;
+      document.getElementById('forks-count').textContent = totalRepositoriesF;
+      document.getElementById('watchers-count').textContent = totalRepositoriesW;
+    }
+
+    // Function to generate JSON
     function generateJSON() {
       const repoInput = document.getElementById('repo-input').value;
       
@@ -38,9 +77,9 @@
         alert('Please enter a GitHub repository in the format username/repo-name.');
         return;
       }
-      
+
       const repoUrl = `https://api.github.com/repos/${repoInput}`;
-      var repoData;
+      
       fetch(repoUrl)
         .then(response => {
           if (!response.ok) {
@@ -48,32 +87,41 @@
           }
           return response.json();
         })
-        .then(data => {
-          repoData=data;
-          
-          jsonOutput = document.getElementById('json-output');
+        .then(repoData => {
+          const jsonOutput = document.getElementById('json-output');
           jsonOutput.textContent = JSON.stringify(repoData, null, 2);
-          
+
+          fetch('Github_data.csv')
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Failed to fetch the CSV file.');
+              }
+              return response.text();
+            })
+            .then(csvData => {
+              parseCSV(csvData);
+              compareCounts(repoData, csvData);
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
         })
         .catch(error => {
           alert(error.message);
         });
     }
-      
 
-// CSV parsing
-    var rows;
+    // CSV parsing
     function parseCSV(csvData) {
-      rows = csvData.split('\n');
-
+      const rows = csvData.split('\n');
       const table = document.getElementById('csv-table');
       table.innerHTML = '';
 
-      for (let i = 0; i < rows.length; i++) {
+      for (let i = 0; i < 21; i++) {
         const cells = rows[i].split(',');
         const row = document.createElement('tr');
 
-        for (let j = 0; j < 21  ; j++) {
+        for (let j = 0; j < cells.length; j++) {
           const cell = document.createElement(i === 0 ? 'th' : 'td');
           cell.textContent = cells[j].trim();
           row.appendChild(cell);
@@ -82,65 +130,6 @@
         table.appendChild(row);
       }
     }
-    // Fetch the CSV file
-    fetch('Github_data.csv')
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch the CSV file.');
-        }
-        return response.text();
-      })
-      .then(csvData => {
-        parseCSV(csvData);
-      })
-      .catch(error => {
-        console.error(error);
-      });
-//     fetch(repoUrl)
-//       .then(response=> response.json())
-//       .then(data =>{
-//         const watchersCount = data.watchers;
-// const forksCount = data.forks;
-// const starsCount = data.stargazers_count;
-
-//         document.getElementById('watchers-count').textContent = watchersCount;
-//         document.getElementById('forks-count').textContent = forksCount;
-//         document.getElementById('stars-count').textContent = starsCount;
-      
-//       function compareCounts() {
-//           fetch('Github_data.csv')
-//             .then(response => response.text())
-//             .then(csvData => {
-//               const csvLines = csvData.split('\n');
-//               let totalRepositories = 0;
-
-//               for (let i = 1; i < csvLines.length; i++) {
-//                 const csvFields = csvLines[i].split(',');
-
-//                 const csvStargazersCount = parseInt(csvFields[3], 10);
-//                 const csvForksCount = parseInt(csvFields[4], 10);
-//                 const csvWatchersCount = parseInt(csvFields[5], 10);
-
-//                           if (!isNaN(csvStargazersCount) && !isNaN(csvForksCount) && !isNaN(csvWatchersCount)) {
-//                     if (csvStargazersCount < starsCount && csvForksCount < forksCount && csvWatchersCount < watchersCount) {
-//                       totalRepositories++;
-//                     }
-//                   }
-//                 }
-
-//               document.getElementById('stars-count').textContent = totalRepositories;
-//               document.getElementById('forks-count').textContent = totalRepositories;
-//               document.getElementById('watchers-count').textContent = totalRepositories;
-//             })
-//             .catch(error => {
-//               console.error('Error:', error);
-//             });
-//         }
-//         compareCounts();
-//       })
-//       .catch(error=>{
-//         console.error('Error: ' , error);
-//       });
   </script>
  
 </body>
