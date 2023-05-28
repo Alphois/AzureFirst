@@ -9,7 +9,7 @@
   
   <label for="repo-input">Enter GitHub Repository:</label>
   <input type="text" id="repo-input" placeholder="e.g., username/repo-name">
-  <button onclick="generateJSON()">Generate JSON</button>
+  <button onclick="generateJSON()">Score My Repo</button>
   
   <pre id="json-output"></pre>
   <div class="metrics-container">
@@ -25,11 +25,15 @@
       <div class="metric-label">Stars</div>
       <div class="metric-value" id="stars-count">-</div>
     </div>
+    <div id = "overall">
+    </div>
   </div>
+
   <h2>CSV file Parsing (test) </h2>
   <table id="csv-table"></table>
   <script>
   // Function to compare counts and calculate total repositories
+  
   function compareCounts(repoData, csvData) {
       const watchersCount = repoData.watchers_count;
       const forksCount = repoData.forks_count;
@@ -39,7 +43,7 @@
       let totalRepositoriesS = 0;
       let totalRepositoriesF = 0;
       let totalRepositoriesW = 0;
-      for (let i = 1; i < 20; i++) {
+      for (let i = 1; i < csvData.split('\n').length; i++) {
         const csvFields = csvLines[i].split(',');
 
         const csvStargazersCount = parseInt(csvFields[5]);
@@ -64,9 +68,13 @@
         }
       }
 
-      document.getElementById('stars-count').textContent = totalRepositoriesS;
-      document.getElementById('forks-count').textContent = totalRepositoriesF;
-      document.getElementById('watchers-count').textContent = totalRepositoriesW;
+      document.getElementById('stars-count').textContent = totalRepositoriesS+" out of " + csvData.split('\n').length;
+      document.getElementById('forks-count').textContent = totalRepositoriesF+ " out of " + csvData.split('\n').length;
+      document.getElementById('watchers-count').textContent = totalRepositoriesW + " out of " + csvData.split('\n').length;
+      let average = ((totalRepositoriesF+totalRepositoriesS+totalRepositoriesW)/(3* csvData.split('\n').length))*100;
+      let genericStr = "have more watchers, stars, and forks than you on average";
+      let str = average + '% ' + genericStr;
+      document.getElementById('overall').textContent=str;
     }
 
     // Function to generate JSON
@@ -88,8 +96,8 @@
           return response.json();
         })
         .then(repoData => {
-          const jsonOutput = document.getElementById('json-output');
-          jsonOutput.textContent = JSON.stringify(repoData, null, 2);
+          // const jsonOutput = document.getElementById('json-output');
+          // jsonOutput.textContent = JSON.stringify(repoData, null, 2);
 
           fetch('Github_data.csv')
             .then(response => {
