@@ -72,7 +72,7 @@
       document.getElementById('forks-count').textContent = totalRepositoriesF+ " out of " + csvData.split('\n').length;
       document.getElementById('watchers-count').textContent = totalRepositoriesW + " out of " + csvData.split('\n').length;
       let average = ((totalRepositoriesF+totalRepositoriesS+totalRepositoriesW)/(3* csvData.split('\n').length))*100;
-      let genericStr = (average<5? "have more watchers, stars, and forks than you on average": "have more watche- BRO TOUCH GRASS JESUS");
+      let genericStr = "have more watchers, stars, and forks than you on average";
       let str = average + '% ' + genericStr;
       document.getElementById('overall').textContent=str;
     }
